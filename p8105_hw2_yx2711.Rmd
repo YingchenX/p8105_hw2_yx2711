@@ -1,0 +1,15 @@
+---
+title: "P8105_hw2_yx2711"
+author: yx2711
+date: "2022-10-03"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library()
+```
+
+
