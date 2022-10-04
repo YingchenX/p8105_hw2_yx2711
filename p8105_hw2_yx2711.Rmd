@@ -9,7 +9,82 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
-library()
+library(readxl)
 ```
+
+
+# Problem 1
+
+Import the `NYC_Transit_Subway_Entrance_And_Exit_Data` data set and change the variable type of route 8-11 to character type. Clean dataset name using `janitor::clean_names()`. Use `ifelse` to convert `entry` from character `YES` or `No` to logical variable type. 
+The data is not tidy yet. Its dimension is 20 columns and 1868 rows.
+
+```{r}
+transit = 
+  read_csv(
+    "C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+    col_types = cols(Route8 = "c", Route9 = "c", Route10 = "c", Route11 = "c")) %>% 
+  janitor::clean_names() %>% 
+  select(
+    line, station_name, station_latitude, station_longitude, 
+    starts_with("route"), entry, exit_only, vending, entrance_type, 
+    ada) %>% 
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
+
+nrow(transit)
+ncol(transit)
+```
+
+Uses `distinct` to obtain the number of distinct stations. There are 465 distinct stations.
+
+```{r}
+transit %>% 
+  select(station_name, line) %>% 
+  distinct
+```
+
+Use `filter()` to obtain the number of ADA compliant stations. There are 84 ADA compliant stations 
+
+```{r}
+transit %>% 
+  filter(ada == TRUE) %>% 
+  select(station_name, line) %>% 
+  distinct
+```
+
+Use `filter()` to obtain the proportion of station entrances / exits without vending allow entrance. There are 37.7% station station entrances / exits without vending allow entrance.
+
+```{r}
+transit %>% 
+  filter(vending == "NO") %>% 
+  pull(entry) %>% 
+  mean
+```
+
+Use `pivot_longer()` to tidy data first. Then use `filter()` and `distinct` to obtain the number of distinct station with A train and with A train and are ADA compliant.
+
+```{r}
+transit %>% 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_num",
+    values_to = "route") %>% 
+  filter(route == "A") %>% 
+  select(station_name, line) %>% 
+  distinct
+
+transit %>% 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_num",
+    values_to = "route") %>% 
+  filter(route == "A", ada == TRUE) %>% 
+  select(station_name, line) %>% 
+  distinct
+```
+
+
+
+
+
 
 
