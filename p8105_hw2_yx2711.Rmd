@@ -138,8 +138,14 @@ sport_ball = filter(
   pull(sports_balls) %>% 
   sum()
 
+trash_wheel %>% 
+ filter(sheet == "Mr Trash Wheel" & year == "2020") %>% 
+  pull(sports_balls) %>% 
+  sum(na.rm = TRUE)
+
 weight
 sport_ball
+sports_balls
 ```
 
 The resulting dataset has `r nrow(trash_wheel)` observations.
@@ -151,8 +157,74 @@ The total number of sports balls collected by Mr. Trash Wheel in 2020 is `r sum(
 
 # Problem 3
 
+Import `pols-month` dataset. Use `separate()` and `mutate()` to break up variable month.
+```{r}
+pols_month = 
+  read.csv("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(mon, into = c("year", "month", "day")) %>% 
+  mutate(
+    year = as.integer(year),
+    month = month.name[as.integer(month)],
+    day = as.integer(day),
+    president = ifelse(prez_gop == 1, "gop", "dem")
+  ) %>% 
+  select(-day, -prez_dem, -prez_gop)
+
+pols_month
+ 
+```
 
 ```{r}
+snp = 
+  read.csv("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/fivethirtyeight_datasets/snp.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(date = as.Date(date)) %>% 
+  separate(date, into = c("month", "day", "year")) %>% 
+  mutate(
+    year = as.integer(year),
+    month = month.name[as.integer(month)],
+    day = as.integer(day),
+  ) %>% 
+  relocate(year, month)
 
+snp
 ```
+
+```{r}
+unemployment = 
+  read.csv("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/fivethirtyeight_datasets/unemployment.csv") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    jan:dec,
+    names_to = "month",
+    values_to = "Unemployed"
+  ) 
+
+unemployment
+```
+
+Merge snp into pols
+```{r}
+snp_pols =
+  left_join(pols_month, snp)
+
+snp_pols
+```
+
+```{r}
+result = 
+  left_join(snp_pols, unemployment)
+
+result
+
+nrow(result)
+ncol(result)
+range(result$year)
+```
+
+The pols_month dataset contains year, month, president.
+The snp dataset contains year, month, and close.
+The unemployment dataset contains year, month and unemployed.
+The resulting dataset has `r nrow(result)` rows and `r ncol(result)` columns. The range of years is `range(result$year)`. The key variables are 
 
