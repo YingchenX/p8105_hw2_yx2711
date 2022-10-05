@@ -5,7 +5,7 @@ date: "2022-10-03"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
@@ -83,8 +83,18 @@ transit %>%
 ```
 
 
+# Problem 2
 
+Import `Trash Wheel Collection Data` and clean names. 
+Use `select()` to select dumpster-specific data and `as.integer()`to convert the number of sports balls to integer.
+```{r}
+trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/Trash Wheel Collection Data.xlsx", sheet = 1) %>% 
+  janitor::clean_names() %>% 
+  select(dumpster:homes_powered) %>% 
+  mutate(sports_balls = as.integer(sports_balls))
 
+trash_wheel
+```
 
 
 
