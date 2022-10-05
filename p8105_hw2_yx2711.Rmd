@@ -93,7 +93,7 @@ mr_trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw
   janitor::clean_names() %>% 
   select(dumpster:homes_powered) %>% 
   mutate(
-    sports_balls = as.integer(sports_balls),
+    sports_balls = as.integer(round(sports_balls, 0)),
     sheet = "Mr. Trash Wheel") %>% 
   drop_na(dumpster)
 
@@ -110,6 +110,7 @@ professor_trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p
   janitor::clean_names() %>% 
   select(dumpster:homes_powered) %>% 
   mutate(
+    sports_balls = as.integer(NA),
     year = as.character(year),
     sheet = "Professor Trash Wheel")%>% 
   drop_na(dumpster)
@@ -121,7 +122,7 @@ Combine two datasets using `full_join()`
 ```{r}
 trash_wheel = full_join(mr_trash_wheel, professor_trash_wheel)
 
-sum(trash_wheel$sports_balls)
+trash_wheel
 ```
 
 ```{r}
@@ -132,14 +133,26 @@ weight = filter(
   pull(weight_tons) %>% 
   sum()
 
-sports_balls = filter(
-  trash_wheel, sheet == "Mr Trash Wheel" & year == "2020") %>%
+sport_ball = filter(
+  mr_trash_wheel, year == "2020") %>% 
   pull(sports_balls) %>% 
   sum()
 
+weight
+sport_ball
 ```
 
 The resulting dataset has `r nrow(trash_wheel)` observations.
 
 The total weight of trash collected by professor trash wheel is `r sum(weight)` tons.
-The total number of sports balls collected by Mr. Trash Wheel in 2020 is `r sum(sports_balls)`.
+The total number of sports balls collected by Mr. Trash Wheel in 2020 is `r sum(sport_ball)`.
+
+
+
+# Problem 3
+
+
+```{r}
+
+```
+
