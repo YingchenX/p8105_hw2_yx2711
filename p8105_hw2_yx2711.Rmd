@@ -85,16 +85,61 @@ transit %>%
 
 # Problem 2
 
-Import `Trash Wheel Collection Data` and clean names. 
+Import `Trash Wheel Collection Data` - `Mr. Trash Wheel` and clean names. 
 Use `select()` to select dumpster-specific data and `as.integer()`to convert the number of sports balls to integer.
+Add a variable "sheet" using `mutate()`
 ```{r}
-trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/Trash Wheel Collection Data.xlsx", sheet = 1) %>% 
+mr_trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/Trash Wheel Collection Data.xlsx", sheet = 1) %>% 
   janitor::clean_names() %>% 
   select(dumpster:homes_powered) %>% 
-  mutate(sports_balls = as.integer(sports_balls))
+  mutate(
+    sports_balls = as.integer(sports_balls),
+    sheet = "Mr. Trash Wheel") %>% 
+  drop_na(dumpster)
 
-trash_wheel
+mr_trash_wheel
+
 ```
 
 
+Import `Trash Wheel Collection Data` - `Professor Trash Wheel` and clean names. 
+Use `select()` to select dumpster-specific data.
+Use `mutate()` to change the year to a character type and add a variable "sheet"
+```{r}
+professor_trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/Trash Wheel Collection Data.xlsx", sheet = 2) %>% 
+  janitor::clean_names() %>% 
+  select(dumpster:homes_powered) %>% 
+  mutate(
+    year = as.character(year),
+    sheet = "Professor Trash Wheel")%>% 
+  drop_na(dumpster)
 
+professor_trash_wheel
+```
+
+Combine two datasets using `full_join()`
+```{r}
+trash_wheel = full_join(mr_trash_wheel, professor_trash_wheel)
+
+sum(trash_wheel$sports_balls)
+```
+
+```{r}
+nrow(trash_wheel)
+
+weight = filter(
+  trash_wheel, sheet == "Professor Trash Wheel") %>% 
+  pull(weight_tons) %>% 
+  sum()
+
+sports_balls = filter(
+  trash_wheel, sheet == "Mr Trash Wheel" & year == "2020") %>%
+  pull(sports_balls) %>% 
+  sum()
+
+```
+
+The resulting dataset has `r nrow(trash_wheel)` observations.
+
+The total weight of trash collected by professor trash wheel is `r sum(weight)` tons.
+The total number of sports balls collected by Mr. Trash Wheel in 2020 is `r sum(sports_balls)`.
