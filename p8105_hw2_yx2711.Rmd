@@ -112,7 +112,7 @@ professor_trash_wheel = read_xlsx("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p
   mutate(
     sports_balls = as.integer(NA),
     year = as.character(year),
-    sheet = "Professor Trash Wheel")%>% 
+    sheet = "Professor Trash Wheel") %>% 
   drop_na(dumpster)
 
 professor_trash_wheel
@@ -120,36 +120,28 @@ professor_trash_wheel
 
 Combine two datasets using `full_join()`
 ```{r}
-trash_wheel = full_join(mr_trash_wheel, professor_trash_wheel)
+trash_wheel = bind_rows(mr_trash_wheel, professor_trash_wheel)
 
 trash_wheel
+
 ```
 
 ```{r}
 nrow(trash_wheel)
+ncol(trash_wheel)
 
 weight = filter(
   trash_wheel, sheet == "Professor Trash Wheel") %>% 
-  pull(weight_tons) %>% 
-  sum()
+  pull(weight_tons) 
 
-sport_ball = filter(
-  mr_trash_wheel, year == "2020") %>% 
-  pull(sports_balls) %>% 
-  sum()
+sport_ball = trash_wheel %>% 
+ filter(sheet == "Mr. Trash Wheel" & year == "2020") %>% 
+  pull(sports_balls)
 
-trash_wheel %>% 
- filter(sheet == "Mr Trash Wheel" & year == "2020") %>% 
-  pull(sports_balls) %>% 
-  sum(na.rm = TRUE)
-
-weight
-sport_ball
-sports_balls
 ```
 
-The resulting dataset has `r nrow(trash_wheel)` observations.
-
+The resulting dataset has `r nrow(trash_wheel)` observations and `r ncol(trash_wheel)` variables.
+Some examples of key variables are weight, volume, plastic bottles, polystyrene and so on. 
 The total weight of trash collected by professor trash wheel is `r sum(weight)` tons.
 The total number of sports balls collected by Mr. Trash Wheel in 2020 is `r sum(sport_ball)`.
 
@@ -158,6 +150,8 @@ The total number of sports balls collected by Mr. Trash Wheel in 2020 is `r sum(
 # Problem 3
 
 Import `pols-month` dataset. Use `separate()` and `mutate()` to break up variable month.
+Use `ifelse()` to create a president variable.
+Use `select()` to drop variable.
 ```{r}
 pols_month = 
   read.csv("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/fivethirtyeight_datasets/pols-month.csv") %>% 
@@ -167,30 +161,33 @@ pols_month =
     year = as.integer(year),
     month = month.name[as.integer(month)],
     day = as.integer(day),
-    president = ifelse(prez_gop == 1, "gop", "dem")
+    president = ifelse(prez_gop == 0, "dem", "gop" )
   ) %>% 
   select(-day, -prez_dem, -prez_gop)
-
-pols_month
  
 ```
 
+
+Import `snp` dataset. Use `separate()` and `mutate()` to break up variable month. 
 ```{r}
 snp = 
   read.csv("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/fivethirtyeight_datasets/snp.csv") %>% 
   janitor::clean_names() %>% 
-  mutate(date = as.Date(date)) %>% 
-  separate(date, into = c("month", "day", "year")) %>% 
-  mutate(
+  mutate(date = lubridate::mdy(date)) %>% 
+  separate(date, into = c("year","month", "day")) %>% 
+   mutate(
     year = as.integer(year),
+    year = ifelse(year > 2015, year - 100, year),
     month = month.name[as.integer(month)],
     day = as.integer(day),
   ) %>% 
-  relocate(year, month)
+  relocate(year, month) %>% 
+  select(-day)
 
-snp
 ```
 
+Import `unemployment` dataset
+Use `pivot_longer()` to convert the dataset from wide to long format.
 ```{r}
 unemployment = 
   read.csv("C:/Users/Carolinexyc/OneDrive/Desktop/P8105/p8105_hw2_yx2711/fivethirtyeight_datasets/unemployment.csv") %>% 
@@ -199,9 +196,12 @@ unemployment =
     jan:dec,
     names_to = "month",
     values_to = "Unemployed"
-  ) 
+  ) %>% 
+  mutate(
+    month = str_to_title(month),
+    month = month.name[match(month, month.abb)]
+  )
 
-unemployment
 ```
 
 Merge snp into pols
@@ -209,22 +209,21 @@ Merge snp into pols
 snp_pols =
   left_join(pols_month, snp)
 
-snp_pols
 ```
 
+Merging unemployment into the result
 ```{r}
 result = 
   left_join(snp_pols, unemployment)
 
-result
-
 nrow(result)
 ncol(result)
-range(result$year)
+max(result$year)
+min(result$year)
 ```
 
-The pols_month dataset contains year, month, president.
-The snp dataset contains year, month, and close.
-The unemployment dataset contains year, month and unemployed.
-The resulting dataset has `r nrow(result)` rows and `r ncol(result)` columns. The range of years is `range(result$year)`. The key variables are 
+The pols_month dataset contains in total `r ncol(pols_month)` variables and `r nrow(pols_month)` observations, and key variables are year, month, and president.  
+The snp dataset contains `r ncol(snp)` variables and `r nrow(snp)` observations, and key variables are year, month, and close.
+The unemployment dataset contains `r ncol(unemployment)` variables and `r nrow(unemployment)` observations, and key variables are year, month and unemployment.  
+The resulting dataset has `r nrow(result)` rows and `r ncol(result)` columns. The range of years is from `r min(result$year)` to `r max(result$year)`. The key variables are year, month, president, close, and unemployment. 
 
